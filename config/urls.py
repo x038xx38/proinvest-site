@@ -6,7 +6,7 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.documents import urls as wagtaildocs_urls
 
-from apps.core.views import robots_txt
+from apps.core.views import robots_txt, styleguide
 
 urlpatterns = [
     # Django Admin — заявки, заказы, тарифы, промокоды
@@ -16,6 +16,8 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("sitemap.xml", sitemap),
     path("robots.txt", robots_txt),
+    path("styleguide/", styleguide, name="styleguide"),
+    path("styleguide/<slug:slug>/", styleguide, name="styleguide"),
 ]
 
 if settings.DEBUG:

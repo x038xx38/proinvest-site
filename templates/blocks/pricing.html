@@ -1,0 +1,30 @@
+{% extends "blocks/_section.html" %}
+{% load core_tags %}
+{% block body %}
+<div class="mt-10 grid gap-6 md:mt-12{% if value.plans|length == 2 %} md:grid-cols-2 lg:max-w-4xl{% elif value.plans|length == 3 %} md:grid-cols-2 lg:grid-cols-3{% elif value.plans|length == 4 %} md:grid-cols-2 lg:grid-cols-4{% endif %}">
+  {% for plan in value.plans %}
+  <article class="card relative flex flex-col{% if plan.highlighted %} border-2 border-accent shadow-xl{% endif %}">
+    {% if plan.badge %}<span class="absolute -top-3.5 left-6 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide">{{ plan.badge }}</span>{% endif %}
+    <h3 class="text-xl">{{ plan.name }}</h3>
+    {% if plan.description %}<p class="mt-2 text-sm text-ink-soft">{{ plan.description }}</p>{% endif %}
+    <p class="mt-6">
+      {% if plan.old_price %}<s class="mr-2 text-muted">{{ plan.old_price }}</s>{% endif %}
+      <span class="text-3xl font-extrabold">{{ plan.price }}</span>
+    </p>
+    {% if plan.note %}<p class="mt-1 text-sm text-muted">{{ plan.note }}</p>{% endif %}
+    {% if plan.features %}
+    <ul class="mt-6 flex flex-1 flex-col gap-3 border-t border-line pt-6">
+      {% for feature in plan.features %}
+      <li class="flex gap-3">{% icon "check" "mt-0.5 size-5 shrink-0 text-accent-hover" %}<span>{{ feature }}</span></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if plan.button.text %}
+    <div class="mt-8">
+      {% if plan.highlighted %}{% include "blocks/_button.html" with link=plan.button css="btn-primary w-full" %}{% else %}{% include "blocks/_button.html" with link=plan.button css="btn-outline w-full" %}{% endif %}
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

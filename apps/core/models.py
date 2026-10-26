@@ -1,6 +1,9 @@
 from django.db import models
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel
 from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
+from wagtail.fields import StreamField
+
+from .blocks import FooterColumnBlock, LinkBlock, NavItemBlock
 
 
 @register_setting(icon="cog")
@@ -36,3 +39,33 @@ class SiteSettings(BaseGenericSetting):
 
     class Meta:
         verbose_name = "Настройки сайта"
+
+
+@register_setting(icon="list-ul")
+class Navigation(BaseGenericSetting):
+    """Меню шапки и подвала. Начальные пункты создаёт миграция 0003_navigation_defaults."""
+
+    header_menu = StreamField([("item", NavItemBlock())], verbose_name="Меню в шапке", blank=True)
+    header_button = StreamField(
+        [("link", LinkBlock())],
+        verbose_name="Кнопка в шапке",
+        blank=True,
+        max_num=1,
+        help_text="Ссылка #consultation открывает форму консультации",
+    )
+    footer_columns = StreamField(
+        [("column", FooterColumnBlock())], verbose_name="Колонки подвала", blank=True
+    )
+    legal_links = StreamField(
+        [("link", LinkBlock())], verbose_name="Юридические ссылки в подвале", blank=True
+    )
+
+    panels = [
+        FieldPanel("header_menu"),
+        FieldPanel("header_button"),
+        FieldPanel("footer_columns"),
+        FieldPanel("legal_links"),
+    ]
+
+    class Meta:
+        verbose_name = "Навигация"

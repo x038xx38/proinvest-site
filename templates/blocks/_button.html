@@ -1,0 +1,2 @@
+{# Кнопка из LinkBlock: link, css #}
+<a href="{{ link.href }}" class="{{ css|default:'btn-primary' }}"{% if link.href|slice:':4' == 'http' %} target="_blank" rel="noopener"{% endif %}>{{ link.text }}</a>

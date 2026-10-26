@@ -1,41 +1,64 @@
-<header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+{% load core_tags %}
+{% with nav=settings.core.Navigation s=settings.core.SiteSettings %}
+<header x-data="{ open: false }"
+        x-effect="document.documentElement.classList.toggle('overflow-hidden', open)"
+        @keydown.escape.window="open = false"
+        @resize.window="if (window.innerWidth >= 1024) open = false"
+        class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
   <div class="container-site flex h-16 items-center justify-between gap-6 md:h-20">
-    <a href="/" class="text-xl font-extrabold tracking-tight">Про<span class="text-accent">Инвест</span></a>
+    {% include "includes/logo.html" %}
 
     <nav class="hidden items-center gap-8 text-[15px] font-medium lg:flex" aria-label="Основное меню">
-      <div class="group relative">
-        <a href="/uslugi/" class="hover:text-accent-hover">Услуги</a>
-        <div class="invisible absolute left-0 top-full w-72 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
-          <div class="card flex flex-col gap-3 p-4 shadow-lg">
-            <a href="/uslugi/podbor/" class="hover:text-accent-hover">Инвестиционный подбор</a>
-            <a href="/uslugi/upravlenie/" class="hover:text-accent-hover">Управление кладовыми и машино-местами</a>
-            <a href="/obuchenie/" class="hover:text-accent-hover">Обучение</a>
+      {% for block in nav.header_menu %}{% with item=block.value %}
+        {% if item.children %}
+        <div class="group relative">
+          <a href="{{ item.href }}" class="inline-flex items-center gap-1 hover:text-accent-hover{% if item.href|is_active:request.path %} text-accent-hover{% endif %}">
+            {{ item.text }}{% icon "chevron-down" "size-4 transition group-hover:rotate-180 group-focus-within:rotate-180" %}
+          </a>
+          <div class="invisible absolute -left-4 top-full w-80 pt-3 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+            <div class="card flex flex-col gap-1 p-2! shadow-lg">
+              {% for child in item.children %}
+              <a href="{{ child.href }}" class="rounded-lg px-4 py-2.5 hover:bg-surface{% if child.href|is_active:request.path %} bg-surface{% endif %}"{% if child.href == request.path %} aria-current="page"{% endif %}>{{ child.text }}</a>
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
-      <a href="/o-proekte/" class="hover:text-accent-hover">О проекте</a>
-      <a href="/kejsy/" class="hover:text-accent-hover">Кейсы</a>
-      <a href="/stati/" class="hover:text-accent-hover">Статьи</a>
-      <a href="/kontakty/" class="hover:text-accent-hover">Контакты</a>
+        {% else %}
+        <a href="{{ item.href }}" class="hover:text-accent-hover{% if item.href|is_active:request.path %} text-accent-hover{% endif %}"{% if item.href == request.path %} aria-current="page"{% endif %}>{{ item.text }}</a>
+        {% endif %}
+      {% endwith %}{% endfor %}
     </nav>
 
-    <a href="#consultation" class="btn-primary hidden py-2.5! lg:inline-flex">Консультация</a>
+    <div class="hidden items-center gap-6 lg:flex">
+      {% if s.phone %}<a href="tel:{{ s.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="hidden font-semibold whitespace-nowrap hover:text-accent-hover xl:inline">{{ s.phone }}</a>{% endif %}
+      {% for block in nav.header_button %}{% include "blocks/_button.html" with link=block.value css="btn-primary py-2.5!" %}{% endfor %}
+    </div>
 
-    <button type="button" class="p-2 lg:hidden" data-menu-toggle aria-controls="mobile-menu" aria-expanded="false" aria-label="Открыть меню">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button type="button" class="-mr-2 p-2 lg:hidden" @click="open = !open" :aria-expanded="open" aria-controls="mobile-menu" :aria-label="open ? 'Закрыть меню' : 'Открыть меню'" aria-label="Открыть меню">
+      <span x-show="!open">{% icon "menu" %}</span>
+      <span x-show="open" x-cloak>{% icon "close" %}</span>
     </button>
   </div>
 
-  <nav id="mobile-menu" class="hidden border-t border-line bg-white lg:hidden" aria-label="Мобильное меню">
-    <div class="container-site flex flex-col gap-4 py-6 text-lg font-medium">
-      <a href="/uslugi/podbor/">Инвестиционный подбор</a>
-      <a href="/uslugi/upravlenie/">Управление</a>
-      <a href="/obuchenie/">Обучение</a>
-      <a href="/o-proekte/">О проекте</a>
-      <a href="/kejsy/">Кейсы</a>
-      <a href="/stati/">Статьи</a>
-      <a href="/kontakty/">Контакты</a>
-      <a href="#consultation" class="btn-primary mt-2">Консультация</a>
+  <nav id="mobile-menu" x-show="open" x-cloak x-transition.opacity
+       @click="if ($event.target.closest('a')) open = false"
+       class="fixed inset-x-0 bottom-0 top-16 overflow-y-auto border-t border-line bg-white lg:hidden" aria-label="Мобильное меню">
+    <div class="container-site flex flex-col py-4">
+      {% for block in nav.header_menu %}{% with item=block.value %}
+        {% if item.children %}
+          {% for child in item.children %}
+          <a href="{{ child.href }}" class="border-b border-line py-4 text-lg font-semibold{% if child.href|is_active:request.path %} text-accent-hover{% endif %}">{{ child.text }}</a>
+          {% endfor %}
+        {% else %}
+          <a href="{{ item.href }}" class="border-b border-line py-4 text-lg font-semibold{% if item.href|is_active:request.path %} text-accent-hover{% endif %}">{{ item.text }}</a>
+        {% endif %}
+      {% endwith %}{% endfor %}
+      <div class="mt-6 flex flex-col gap-4">
+        {% for block in nav.header_button %}{% include "blocks/_button.html" with link=block.value css="btn-primary w-full" %}{% endfor %}
+        {% if s.phone %}<a href="tel:{{ s.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="btn-outline w-full">{% icon "phone" "size-5" %}{{ s.phone }}</a>{% endif %}
+        {% if s.telegram_url %}<a href="{{ s.telegram_url }}" class="btn-outline w-full" target="_blank" rel="noopener">{% icon "send" "size-5" %}Telegram</a>{% endif %}
+      </div>
     </div>
   </nav>
 </header>
+{% endwith %}

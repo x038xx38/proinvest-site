@@ -5,6 +5,26 @@
 @source "../apps";
 @source "../static/js";
 
+/* Manrope со своего сервера (variable, 200–800): без запросов к Google и передачи IP по 152-ФЗ.
+ * Путь относительно собранного static/dist/main.css */
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("../fonts/manrope-cyrillic-wght-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("../fonts/manrope-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /*
  * Дизайн-токены. Ориентир — smarent.com: светлый фон, графитовый текст, жёлтый акцент.
  * Geometria (шрифт референса) коммерческий — временно Manrope; меняется здесь в одном месте.
@@ -44,6 +64,7 @@
   h2 { @apply text-2xl md:text-4xl; }
   h3 { @apply text-xl md:text-2xl; }
   a { @apply transition-colors; }
+  [x-cloak] { display: none !important; }
 }
 
 /* Компоненты: кнопки, карточки, поля */
@@ -84,4 +105,29 @@
 
 @utility eyebrow {
   @apply text-sm font-semibold uppercase tracking-wider text-ink-soft;
+}
+
+@utility icon-badge {
+  @apply inline-flex size-12 shrink-0 items-center justify-center rounded-(--radius-card) bg-accent-soft
+    text-ink;
+}
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-ink-soft;
+}
+
+/* Текст из визуального редактора Wagtail */
+@layer components {
+  .rich-text > * + * { @apply mt-4; }
+  .rich-text h2 { @apply mt-10 text-2xl md:text-3xl; }
+  .rich-text h3 { @apply mt-8 text-xl; }
+  .rich-text ul { @apply list-disc pl-6; }
+  .rich-text ol { @apply list-decimal pl-6; }
+  .rich-text li + li { @apply mt-1.5; }
+  .rich-text a { @apply underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-hover; }
+  .rich-text hr { @apply my-8 border-line; }
+
+  /* Модальное окно на <dialog>: фокус, Esc и подложку даёт браузер */
+  dialog.modal { @apply m-auto w-[calc(100%-2rem)] max-w-lg rounded-(--radius-card) bg-white p-0 text-ink shadow-2xl; }
+  dialog.modal::backdrop { @apply bg-dark/60 backdrop-blur-sm; }
 }

@@ -1,0 +1,22 @@
+{# Поля заявки: prefix (уникальность id на странице), lead_type, button_text. Обработчик — этап 3 #}
+<form method="post" class="flex flex-col gap-4" data-lead-form>
+  {% csrf_token %}
+  <input type="hidden" name="lead_type" value="{{ lead_type }}">
+  <div>
+    <label for="{{ prefix }}-name" class="label">Имя</label>
+    <input id="{{ prefix }}-name" name="name" type="text" class="input" autocomplete="name" required maxlength="100">
+  </div>
+  <div>
+    <label for="{{ prefix }}-contact" class="label">Телефон или Telegram</label>
+    <input id="{{ prefix }}-contact" name="contact" type="text" class="input" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00 или @username" required maxlength="100">
+  </div>
+  <div>
+    <label for="{{ prefix }}-comment" class="label">Комментарий <span class="text-muted">— необязательно</span></label>
+    <textarea id="{{ prefix }}-comment" name="comment" rows="3" class="input resize-y" maxlength="2000"></textarea>
+  </div>
+  <label class="flex gap-3 text-sm text-ink-soft">
+    <input type="checkbox" name="consent" required class="mt-0.5 size-5 shrink-0 accent-accent-hover">
+    <span>Согласен на <a href="/politika/" class="underline hover:text-accent-hover" target="_blank">обработку персональных данных</a></span>
+  </label>
+  <button type="submit" class="btn-primary mt-2 w-full">{{ button_text|default:"Отправить заявку" }}</button>
+</form>

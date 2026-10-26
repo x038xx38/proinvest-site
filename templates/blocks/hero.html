@@ -1,0 +1,40 @@
+{% load wagtailimages_tags %}
+<section class="pb-14 pt-4 md:pb-20 md:pt-8">
+  <div class="container-site">
+    <div class="relative overflow-hidden rounded-[20px] bg-surface px-6 py-12 md:px-14 md:py-20{% if value.image %} grid items-center gap-10 lg:grid-cols-2{% endif %}">
+      {% if not value.image %}
+      <div class="pointer-events-none absolute -right-24 -top-24 hidden size-96 rounded-full bg-accent/70 md:block" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-32 right-40 hidden size-64 rounded-full bg-accent-soft md:block" aria-hidden="true"></div>
+      {% endif %}
+      <div class="relative max-w-3xl">
+        {% if value.eyebrow %}<p class="eyebrow">{{ value.eyebrow }}</p>{% endif %}
+        <h1 class="{% if value.eyebrow %}mt-4 {% endif %}text-[2rem] md:text-5xl lg:text-[3.5rem]">{{ value.title }}</h1>
+        {% if value.text %}<p class="mt-6 max-w-2xl text-lg text-ink-soft md:text-xl">{{ value.text|linebreaksbr }}</p>{% endif %}
+        {% if value.buttons %}
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          {% for link in value.buttons %}
+            {% if forloop.first %}{% include "blocks/_button.html" with css="btn-primary" %}{% else %}{% include "blocks/_button.html" with css="btn-outline" %}{% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% if value.image %}
+      <div class="relative">
+        {% image value.image fill-720x560 class="aspect-[9/7] w-full rounded-(--radius-card) object-cover" fetchpriority="high" %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if value.facts %}
+    <dl class="mt-8 grid grid-cols-2 gap-6 md:mt-10 md:grid-cols-4">
+      {% for fact in value.facts %}
+      <div class="border-l-4 border-accent pl-4">
+        <dt class="sr-only">{{ fact.label }}</dt>
+        <dd class="text-2xl font-extrabold md:text-4xl">{{ fact.value }}</dd>
+        <dd class="mt-1 text-sm text-ink-soft">{{ fact.label }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+    {% endif %}
+  </div>
+</section>

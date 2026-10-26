@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block title %}{{ title }} — ПроИнвест{% endblock %}
+{% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block content %}
+<div class="border-b border-line bg-accent-soft">
+  <div class="container-site flex flex-wrap items-center gap-x-6 gap-y-2 py-3 text-sm">
+    <span class="font-semibold">Витрина блоков · демо-данные</span>
+    {% for key, label in pages.items %}
+      <a href="{% if key == 'blocks' %}{% url 'styleguide' %}{% else %}{% url 'styleguide' key %}{% endif %}" class="{% if key == slug %}font-semibold underline decoration-accent-hover decoration-2 underline-offset-4{% else %}hover:text-accent-hover{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% include_block sections %}
+{% endblock %}

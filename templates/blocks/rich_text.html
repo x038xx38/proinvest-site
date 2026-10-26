@@ -1,0 +1,5 @@
+{% extends "blocks/_section.html" %}
+{% load wagtailcore_tags %}
+{% block body %}
+<div class="rich-text mt-8 max-w-3xl text-lg">{{ value.body|richtext }}</div>
+{% endblock %}

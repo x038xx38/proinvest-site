@@ -1,0 +1,15 @@
+{% extends "blocks/_section.html" %}
+{% load core_tags wagtailcore_tags %}
+{% block body %}
+<div class="mt-10 max-w-3xl divide-y divide-line border-y border-line md:mt-12">
+  {% for item in value.items %}
+  <details class="group">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-lg font-semibold hover:text-accent-hover [&::-webkit-details-marker]:hidden">
+      {{ item.question }}
+      <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface transition group-open:rotate-45 group-open:bg-accent">{% icon "plus" "size-4" %}</span>
+    </summary>
+    <div class="rich-text pb-6 pr-12 text-ink-soft">{{ item.answer|richtext }}</div>
+  </details>
+  {% endfor %}
+</div>
+{% endblock %}
