@@ -1,0 +1,41 @@
+<header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+  <div class="container-site flex h-16 items-center justify-between gap-6 md:h-20">
+    <a href="/" class="text-xl font-extrabold tracking-tight">Про<span class="text-accent">Инвест</span></a>
+
+    <nav class="hidden items-center gap-8 text-[15px] font-medium lg:flex" aria-label="Основное меню">
+      <div class="group relative">
+        <a href="/uslugi/" class="hover:text-accent-hover">Услуги</a>
+        <div class="invisible absolute left-0 top-full w-72 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+          <div class="card flex flex-col gap-3 p-4 shadow-lg">
+            <a href="/uslugi/podbor/" class="hover:text-accent-hover">Инвестиционный подбор</a>
+            <a href="/uslugi/upravlenie/" class="hover:text-accent-hover">Управление кладовыми и машино-местами</a>
+            <a href="/obuchenie/" class="hover:text-accent-hover">Обучение</a>
+          </div>
+        </div>
+      </div>
+      <a href="/o-proekte/" class="hover:text-accent-hover">О проекте</a>
+      <a href="/kejsy/" class="hover:text-accent-hover">Кейсы</a>
+      <a href="/stati/" class="hover:text-accent-hover">Статьи</a>
+      <a href="/kontakty/" class="hover:text-accent-hover">Контакты</a>
+    </nav>
+
+    <a href="#consultation" class="btn-primary hidden py-2.5! lg:inline-flex">Консультация</a>
+
+    <button type="button" class="p-2 lg:hidden" data-menu-toggle aria-controls="mobile-menu" aria-expanded="false" aria-label="Открыть меню">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+
+  <nav id="mobile-menu" class="hidden border-t border-line bg-white lg:hidden" aria-label="Мобильное меню">
+    <div class="container-site flex flex-col gap-4 py-6 text-lg font-medium">
+      <a href="/uslugi/podbor/">Инвестиционный подбор</a>
+      <a href="/uslugi/upravlenie/">Управление</a>
+      <a href="/obuchenie/">Обучение</a>
+      <a href="/o-proekte/">О проекте</a>
+      <a href="/kejsy/">Кейсы</a>
+      <a href="/stati/">Статьи</a>
+      <a href="/kontakty/">Контакты</a>
+      <a href="#consultation" class="btn-primary mt-2">Консультация</a>
+    </div>
+  </nav>
+</header>

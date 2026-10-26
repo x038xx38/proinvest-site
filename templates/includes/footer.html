@@ -1,0 +1,31 @@
+{% with s=settings.core.SiteSettings %}
+<footer class="bg-dark text-white/80">
+  <div class="container-site grid gap-10 py-14 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <a href="/" class="text-xl font-extrabold text-white">Про<span class="text-accent">Инвест</span></a>
+      <p class="mt-4 max-w-sm text-sm">Кладовые и машино-места: подбор, управление, обучение.</p>
+      {% if s.regions %}<p class="mt-2 text-sm text-white/60">{{ s.regions }}</p>{% endif %}
+    </div>
+    <div class="flex flex-col gap-2 text-sm">
+      <a href="/uslugi/podbor/" class="hover:text-accent">Инвестиционный подбор</a>
+      <a href="/uslugi/upravlenie/" class="hover:text-accent">Управление</a>
+      <a href="/obuchenie/" class="hover:text-accent">Обучение</a>
+      <a href="/kejsy/" class="hover:text-accent">Кейсы</a>
+      <a href="/stati/" class="hover:text-accent">Статьи</a>
+    </div>
+    <div class="flex flex-col gap-2 text-sm">
+      {% if s.phone %}<a href="tel:{{ s.phone }}" class="hover:text-accent">{{ s.phone }}</a>{% endif %}
+      {% if s.email %}<a href="mailto:{{ s.email }}" class="hover:text-accent">{{ s.email }}</a>{% endif %}
+      {% if s.telegram_url %}<a href="{{ s.telegram_url }}" class="hover:text-accent" target="_blank" rel="noopener">Telegram</a>{% endif %}
+      {% if s.max_url %}<a href="{{ s.max_url }}" class="hover:text-accent" target="_blank" rel="noopener">MAX</a>{% endif %}
+      {% if s.youtube_url %}<a href="{{ s.youtube_url }}" class="hover:text-accent" target="_blank" rel="noopener">YouTube</a>{% endif %}
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="container-site flex flex-col gap-2 py-6 text-xs text-white/50 md:flex-row md:justify-between">
+      <span>© {% now "Y" %} ПроИнвест</span>
+      <span class="flex gap-4"><a href="/politika/" class="hover:text-accent">Политика конфиденциальности</a><a href="/oferta/" class="hover:text-accent">Оферта</a></span>
+    </div>
+  </div>
+</footer>
+{% endwith %}
