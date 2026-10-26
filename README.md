@@ -35,7 +35,8 @@ apps/blog      статьи (этап 2)
 apps/leads     заявки (этап 3)
 apps/course    обучение: потоки, тарифы, заказы, оплата Т-Банк (этап 4)
 templates/     шаблоны
-static/src     исходники CSS/JS; сборка в static/dist
+frontend/      исходник Tailwind (main.css), сборка в static/dist
+static/        статика (js, images) — всё, что попадает в collectstatic
 ```
 
 ## Проверки

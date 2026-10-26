@@ -14,7 +14,7 @@ test -d .venv || python3.12 -m venv .venv
 .venv/bin/pip install --quiet --upgrade pip
 .venv/bin/pip install --quiet -r requirements/prod.txt
 
-/opt/proinvest/bin/tailwindcss -i static/src/css/main.css -o static/dist/main.css --minify
+/opt/proinvest/bin/tailwindcss -i frontend/main.css -o static/dist/main.css --minify
 
 export DJANGO_SETTINGS_MODULE=config.settings.prod
 .venv/bin/python manage.py migrate --noinput

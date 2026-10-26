@@ -54,6 +54,12 @@ jobs:
       - name: Build CSS
         run: npm run build
 
+      - name: Collect static (prod storage)
+        run: python manage.py collectstatic --noinput -v0 --settings=config.settings.prod
+        env:
+          DJANGO_ALLOWED_HOSTS: localhost
+          DJANGO_USE_HTTPS: "false"
+
       - name: Check migrations
         run: python manage.py makemigrations --check --dry-run
 

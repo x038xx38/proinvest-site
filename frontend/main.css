@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /* Источники классов: шаблоны Django и JS */
-@source "../../../templates";
-@source "../../../apps";
-@source "../js";
+@source "../templates";
+@source "../apps";
+@source "../static/js";
 
 /*
  * Дизайн-токены. Ориентир — smarent.com: светлый фон, графитовый текст, жёлтый акцент.
