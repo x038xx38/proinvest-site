@@ -1,28 +1,14 @@
-{% extends "blocks/_section.html" %}
-{% load core_tags wagtailimages_tags %}
-{% block body %}
-<div class="mt-10 grid gap-6 md:mt-12 md:grid-cols-2 lg:grid-cols-3">
-  {% for case in value.cases %}
-  {% if case.link.text %}<a href="{{ case.link.href }}" class="group card flex flex-col overflow-hidden p-0! transition hover:-translate-y-1 hover:shadow-lg">{% else %}<article class="card flex flex-col overflow-hidden p-0!">{% endif %}
-    {% if case.image %}
-      {% image case.image fill-640x420 class="aspect-[32/21] w-full object-cover" loading="lazy" %}
-    {% else %}
-      <div class="flex aspect-[32/21] items-center justify-center bg-accent-soft text-accent-hover">{% icon "box" "size-14" %}</div>
-    {% endif %}
-    <div class="flex flex-1 flex-col p-6">
-      {% if case.city %}<p class="flex items-center gap-1.5 text-sm text-muted">{% icon "map-pin" "size-4" %}{{ case.city }}</p>{% endif %}
-      <h3 class="mt-2 text-lg md:text-xl">{{ case.title }}</h3>
-      <dl class="mt-6 grid grid-cols-3 gap-3 border-t border-line pt-4 text-sm">
-        {% if case.budget %}<div><dt class="text-muted">Бюджет</dt><dd class="mt-1 font-bold">{{ case.budget }}</dd></div>{% endif %}
-        {% if case.yield_text %}<div><dt class="text-muted">Доходность</dt><dd class="mt-1 font-bold">{{ case.yield_text }}</dd></div>{% endif %}
-        {% if case.term %}<div><dt class="text-muted">Срок</dt><dd class="mt-1 font-bold">{{ case.term }}</dd></div>{% endif %}
-      </dl>
-      {% if case.link.text %}<span class="mt-6 inline-flex items-center gap-2 font-semibold group-hover:text-accent-hover">{{ case.link.text }}{% icon "arrow-right" "size-4" %}</span>{% endif %}
+{# Без кейсов секция не выводится #}
+{% if cards %}
+<section{% if value.anchor %} id="{{ value.anchor }}"{% endif %} class="section scroll-mt-20{% if value.background == 'surface' %} bg-surface{% endif %}">
+  <div class="container-site">
+    {% include "blocks/_section_header.html" %}
+    <div class="mt-10 grid gap-6 md:mt-12 md:grid-cols-2 lg:grid-cols-3">
+      {% for card in cards %}{% include "blocks/_case_card.html" %}{% endfor %}
     </div>
-  {% if case.link.text %}</a>{% else %}</article>{% endif %}
-  {% endfor %}
-</div>
-{% if value.more.text %}
-<div class="mt-10">{% include "blocks/_button.html" with link=value.more css="btn-outline" %}</div>
+    {% if value.more.text %}
+    <div class="mt-10">{% include "blocks/_button.html" with link=value.more css="btn-outline" %}</div>
+    {% endif %}
+  </div>
+</section>
 {% endif %}
-{% endblock %}

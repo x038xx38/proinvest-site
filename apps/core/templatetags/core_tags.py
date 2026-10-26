@@ -77,6 +77,14 @@ def icon(name, css_class="size-6"):
 
 
 @register.filter
+def rub(value):
+    """620000 → «620 000 ₽» с неразрывными пробелами."""
+    if value in (None, ""):
+        return ""
+    return f"{int(value):,}".replace(",", "\u00a0") + "\u00a0₽"
+
+
+@register.filter
 def is_active(href, path):
     """Пункт меню активен на своей странице и её дочерних (кроме главной и якорей)."""
     if not href or not href.startswith("/"):

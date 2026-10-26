@@ -3,10 +3,14 @@
 {% block body %}
 <ul class="mt-10 grid gap-6 md:mt-12 md:grid-cols-2{% if value.columns == '3' %} lg:grid-cols-3{% elif value.columns == '4' %} lg:grid-cols-4{% endif %}">
   {% for item in value.items %}
-  <li class="card flex flex-col gap-4">
-    <span class="icon-badge">{% icon item.icon %}</span>
-    <h3 class="text-lg md:text-xl">{{ item.title }}</h3>
-    {% if item.text %}<p class="text-ink-soft">{{ item.text|linebreaksbr }}</p>{% endif %}
+  <li class="flex">
+    {% if item.link.text %}<a href="{{ item.link.href }}" class="group card flex w-full flex-col gap-4 transition hover:-translate-y-1 hover:shadow-lg">{% else %}<div class="card flex w-full flex-col gap-4">{% endif %}
+      <span class="icon-badge">{% icon item.icon %}</span>
+      <h3 class="text-lg md:text-xl">{{ item.title }}</h3>
+      {% if item.text %}<p class="text-ink-soft">{{ item.text|linebreaksbr }}</p>{% endif %}
+    {% if item.link.text %}
+      <span class="mt-auto inline-flex items-center gap-2 pt-2 font-semibold group-hover:text-accent-hover">{{ item.link.text }}{% icon "arrow-right" "size-4" %}</span>
+    </a>{% else %}</div>{% endif %}
   </li>
   {% endfor %}
 </ul>

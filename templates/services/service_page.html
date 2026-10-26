@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+{% if not page.starts_with_hero %}{% include "includes/page_header.html" with title=page.title intro=page.short_description %}{% endif %}
+{% if subservices %}
+<section class="py-10">
+  <div class="container-site grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {% for service in subservices %}{% include "services/_service_card.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% include_block page.body %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{# Заголовок страницы без обложки: title, intro, eyebrow (необязательно) #}
+<section class="pb-4 pt-10 md:pb-6 md:pt-16">
+  <div class="container-site">
+    {% if eyebrow %}<p class="eyebrow">{{ eyebrow }}</p>{% endif %}
+    <h1 class="max-w-4xl{% if eyebrow %} mt-3{% endif %}">{{ title }}</h1>
+    {% if intro %}<p class="mt-5 max-w-3xl text-lg text-ink-soft md:text-xl">{{ intro|linebreaksbr }}</p>{% endif %}
+  </div>
+</section>

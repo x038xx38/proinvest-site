@@ -1,0 +1,5 @@
+{% load wagtailimages_tags %}
+<figure>
+  {% image value.image width-1200 class="w-full rounded-(--radius-card)" loading="lazy" %}
+  {% if value.caption %}<figcaption class="mt-2 text-sm text-muted">{{ value.caption }}</figcaption>{% endif %}
+</figure>

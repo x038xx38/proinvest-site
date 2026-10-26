@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block content %}
+{% include "includes/page_header.html" with title=page.title intro=page.intro %}
+<section class="pb-14 pt-6 md:pb-20">
+  <div class="container-site">
+    <nav class="flex flex-wrap gap-2" aria-label="Фильтр кейсов">
+      <a href="?" class="rounded-full border px-4 py-2 text-sm font-medium {% if not current_type and not current_service %}border-ink bg-ink text-white{% else %}border-line hover:border-ink{% endif %}">Все</a>
+      {% for value, label in object_types %}
+      <a href="?tip={{ value }}" class="rounded-full border px-4 py-2 text-sm font-medium {% if current_type == value %}border-ink bg-ink text-white{% else %}border-line hover:border-ink{% endif %}">{{ label }}</a>
+      {% endfor %}
+      {% for service in services %}
+      <a href="?usluga={{ service.slug }}" class="rounded-full border px-4 py-2 text-sm font-medium {% if current_service == service.slug %}border-ink bg-ink text-white{% else %}border-line hover:border-ink{% endif %}">{{ service.title }}</a>
+      {% endfor %}
+    </nav>
+
+    {% if page_obj.object_list %}
+    <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for case in page_obj %}{% with card=case.as_card %}{% include "blocks/_case_card.html" %}{% endwith %}{% endfor %}
+    </div>
+    {% if current_type %}{% include "includes/pagination.html" with query="&tip="|add:current_type %}{% elif current_service %}{% include "includes/pagination.html" with query="&usluga="|add:current_service %}{% else %}{% include "includes/pagination.html" %}{% endif %}
+    {% else %}
+    <p class="mt-10 text-lg text-ink-soft">Кейсы скоро появятся.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

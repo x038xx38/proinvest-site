@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+{% include "includes/page_header.html" with title=page.title %}
+<section class="pb-20 pt-6">
+  <div class="container-site">
+    {% if page.updated_at %}<p class="text-sm text-muted">Редакция от {{ page.updated_at|date:"j E Y" }}</p>{% endif %}
+    <div class="rich-text mt-6 max-w-3xl">{{ page.body|richtext }}</div>
+  </div>
+</section>
+{% endblock %}

@@ -15,6 +15,14 @@ class SiteSettings(BaseGenericSetting):
     telegram_url = models.URLField("Telegram", blank=True)
     max_url = models.URLField("MAX", blank=True)
     youtube_url = models.URLField("YouTube", blank=True)
+    address = models.CharField("Адрес офиса", max_length=255, blank=True)
+    work_hours = models.CharField("Часы работы", max_length=120, blank=True)
+    map_embed_url = models.URLField(
+        "Карта (адрес для встраивания)",
+        max_length=500,
+        blank=True,
+        help_text='Конструктор Яндекс Карт → «Получить код» → адрес из src="…" в коде iframe',
+    )
     regions = models.CharField(
         "География",
         max_length=255,
@@ -26,7 +34,15 @@ class SiteSettings(BaseGenericSetting):
 
     panels = [
         MultiFieldPanel(
-            [FieldPanel("phone"), FieldPanel("email"), FieldPanel("regions")], "Контакты"
+            [
+                FieldPanel("phone"),
+                FieldPanel("email"),
+                FieldPanel("address"),
+                FieldPanel("work_hours"),
+                FieldPanel("map_embed_url"),
+                FieldPanel("regions"),
+            ],
+            "Контакты",
         ),
         MultiFieldPanel(
             [FieldPanel("telegram_url"), FieldPanel("max_url"), FieldPanel("youtube_url")],

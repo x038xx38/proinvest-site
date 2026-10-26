@@ -1,7 +1,7 @@
 PY := .venv/bin/python
 PORT ?= 8001
 
-.PHONY: setup up down run css css-watch worker migrate superuser lint test
+.PHONY: setup up down run css css-watch worker migrate superuser content lint test
 
 setup:            ## Первый запуск: venv, зависимости, сервисы, миграции, CSS
 	test -d .venv || python3.12 -m venv .venv
@@ -33,6 +33,9 @@ migrate:
 
 superuser:
 	$(PY) manage.py createsuperuser
+
+content:          ## Дерево страниц с начальным наполнением и демо-данными
+	$(PY) manage.py setup_site --demo
 
 lint:
 	.venv/bin/ruff check . && .venv/bin/ruff format --check .

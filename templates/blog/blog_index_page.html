@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load wagtailroutablepage_tags %}
+{% block title %}{% if current_category %}{{ current_category.name }} — {{ page.title }}{% else %}{{ page.seo_title|default:page.title }}{% endif %} — ПроИнвест{% endblock %}
+{% block content %}
+{% if current_category %}
+  {% include "includes/page_header.html" with eyebrow=page.title title=current_category.name intro=current_category.description %}
+{% else %}
+  {% include "includes/page_header.html" with title=page.title intro=page.intro %}
+{% endif %}
+<section class="pb-14 pt-6 md:pb-20">
+  <div class="container-site">
+    {% if categories %}
+    <nav class="flex flex-wrap gap-2" aria-label="Рубрики">
+      <a href="{% routablepageurl page 'index' %}" class="rounded-full border px-4 py-2 text-sm font-medium {% if not current_category %}border-ink bg-ink text-white{% else %}border-line hover:border-ink{% endif %}">Все</a>
+      {% for category in categories %}
+      <a href="{% routablepageurl page 'category' category.slug %}" class="rounded-full border px-4 py-2 text-sm font-medium {% if current_category == category %}border-ink bg-ink text-white{% else %}border-line hover:border-ink{% endif %}">{{ category.name }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+
+    {% if page_obj.object_list %}
+    <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for article in page_obj %}{% include "includes/article_card.html" %}{% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+    {% else %}
+    <p class="mt-10 text-lg text-ink-soft">Статьи скоро появятся.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

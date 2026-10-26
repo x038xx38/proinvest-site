@@ -6,6 +6,7 @@
 from django.core.exceptions import ValidationError
 from wagtail import blocks
 from wagtail.blocks.struct_block import StructBlockValidationError
+from wagtail.embeds.blocks import EmbedBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 ICON_CHOICES = [
@@ -134,6 +135,7 @@ class BenefitsBlock(SectionBlock):
                 ("icon", blocks.ChoiceBlock(label="Иконка", choices=ICON_CHOICES, default="check")),
                 ("title", blocks.CharBlock(label="Заголовок", max_length=120)),
                 ("text", blocks.TextBlock(label="Текст", required=False)),
+                ("link", OptionalLinkBlock(label="Ссылка (карточка станет кликабельной)")),
             ]
         ),
         label="Пункты",
@@ -214,7 +216,15 @@ class FaqBlock(SectionBlock):
 
 
 class CasesBlock(SectionBlock):
-    # Этап 2: карточки начнут подтягиваться из страниц кейсов; ручной ввод останется запасным
+    pages = blocks.ListBlock(
+        blocks.PageChooserBlock(page_type="cases.CasePage"),
+        label="Выбранные кейсы",
+        default=[],
+        help_text="Если пусто — последние кейсы, а на странице услуги — кейсы этой услуги",
+    )
+    limit = blocks.IntegerBlock(
+        label="Сколько показывать автоматически", default=3, min_value=1, max_value=12
+    )
     cases = blocks.ListBlock(
         blocks.StructBlock(
             [
@@ -227,8 +237,9 @@ class CasesBlock(SectionBlock):
                 ("link", OptionalLinkBlock(label="Ссылка")),
             ]
         ),
-        label="Кейсы",
-        min_num=1,
+        label="Карточки вручную",
+        default=[],
+        help_text="Для объектов без страницы кейса. Используются, если кейсы выше не выбраны",
     )
     more = OptionalLinkBlock(label="Кнопка «Все кейсы»")
 
@@ -236,6 +247,37 @@ class CasesBlock(SectionBlock):
         icon = "folder-open-inverse"
         label = "Кейсы"
         template = "blocks/cases.html"
+
+    def get_context(self, value, parent_context=None):
+        context = super().get_context(value, parent_context=parent_context)
+        context["cards"] = self.get_cards(value, (parent_context or {}).get("page"))
+        return context
+
+    @staticmethod
+    def get_cards(value, page=None):
+        from apps.cases.models import CasePage
+        from apps.services.models import ServicePage
+
+        if value["pages"]:
+            return [p.specific.as_card() for p in value["pages"] if p and p.live]
+        if value["cases"]:
+            return [
+                {
+                    "url": card["link"].href if card["link"]["text"] else "",
+                    "link_text": card["link"]["text"],
+                    "image": card["image"],
+                    "title": card["title"],
+                    "city": card["city"],
+                    "budget": card["budget"],
+                    "yield_text": card["yield_text"],
+                    "term": card["term"],
+                }
+                for card in value["cases"]
+            ]
+        cases = CasePage.objects.live().select_related("cover_image").order_by("-deal_date", "-pk")
+        if isinstance(page, ServicePage):
+            cases = cases.filter(service=page)
+        return [case.as_card() for case in cases[: value["limit"]]]
 
 
 class RichTextSectionBlock(SectionBlock):
@@ -288,6 +330,40 @@ class SectionsBlock(blocks.StreamBlock):
     text = RichTextSectionBlock()
     cta = CtaBlock()
     lead_form = LeadFormBlock()
+
+
+# Тело статей и кейсов
+
+
+class ArticleImageBlock(blocks.StructBlock):
+    image = ImageChooserBlock(label="Изображение")
+    caption = blocks.CharBlock(label="Подпись", required=False, max_length=255)
+
+    class Meta:
+        icon = "image"
+        label = "Изображение"
+        template = "blocks/article_image.html"
+
+
+class QuoteBlock(blocks.StructBlock):
+    text = blocks.TextBlock(label="Цитата")
+    author = blocks.CharBlock(label="Автор", required=False, max_length=120)
+
+    class Meta:
+        icon = "openquote"
+        label = "Цитата"
+        template = "blocks/quote.html"
+
+
+class ArticleBlock(blocks.StreamBlock):
+    paragraph = blocks.RichTextBlock(
+        label="Текст",
+        features=["h2", "h3", "bold", "italic", "link", "ol", "ul", "hr", "blockquote"],
+        template="blocks/paragraph.html",
+    )
+    image = ArticleImageBlock()
+    quote = QuoteBlock()
+    video = EmbedBlock(label="Видео", help_text="Ссылка на YouTube, VK Видео, Rutube")
 
 
 # Меню сайта (настройка «Навигация»)

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load core_tags wagtailcore_tags %}
+{% block content %}
+{% include "includes/page_header.html" with title=page.title intro=page.intro %}
+{% with s=settings.core.SiteSettings %}
+<section class="pb-14 pt-6 md:pb-20">
+  <div class="container-site grid gap-6 lg:grid-cols-5">
+    <div class="card flex flex-col gap-6 lg:col-span-2">
+      {% if s.phone %}<div class="flex gap-4"><span class="icon-badge">{% icon "phone" %}</span><div><p class="text-sm text-muted">Телефон</p><a href="tel:{{ s.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="text-lg font-semibold hover:text-accent-hover">{{ s.phone }}</a></div></div>{% endif %}
+      {% if s.email %}<div class="flex gap-4"><span class="icon-badge">{% icon "send" %}</span><div><p class="text-sm text-muted">E-mail</p><a href="mailto:{{ s.email }}" class="text-lg font-semibold hover:text-accent-hover">{{ s.email }}</a></div></div>{% endif %}
+      {% if s.address %}<div class="flex gap-4"><span class="icon-badge">{% icon "map-pin" %}</span><div><p class="text-sm text-muted">Адрес</p><p class="text-lg font-semibold">{{ s.address }}</p>{% if s.work_hours %}<p class="text-ink-soft">{{ s.work_hours }}</p>{% endif %}</div></div>{% endif %}
+      {% if s.regions %}<div class="flex gap-4"><span class="icon-badge">{% icon "building" %}</span><div><p class="text-sm text-muted">Работаем</p><p>{{ s.regions }}</p></div></div>{% endif %}
+      {% if s.telegram_url or s.max_url or s.youtube_url %}
+      <div class="flex flex-wrap gap-3 border-t border-line pt-6">
+        {% if s.telegram_url %}<a href="{{ s.telegram_url }}" class="btn-outline py-2!" target="_blank" rel="noopener">Telegram</a>{% endif %}
+        {% if s.max_url %}<a href="{{ s.max_url }}" class="btn-outline py-2!" target="_blank" rel="noopener">MAX</a>{% endif %}
+        {% if s.youtube_url %}<a href="{{ s.youtube_url }}" class="btn-outline py-2!" target="_blank" rel="noopener">YouTube</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="min-h-80 overflow-hidden rounded-(--radius-card) bg-surface lg:col-span-3">
+      {% if s.map_embed_url %}
+        <iframe src="{{ s.map_embed_url }}" title="Карта" class="size-full min-h-80" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      {% else %}
+        <div class="flex size-full min-h-80 items-center justify-center text-muted">{% icon "map-pin" "size-12" %}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endwith %}
+{% include_block page.body %}
+{% endblock %}

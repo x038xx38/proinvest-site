@@ -1,0 +1,11 @@
+{% load core_tags wagtailcore_tags wagtailimages_tags %}
+<a href="{% pageurl service %}" class="group card flex flex-col gap-4 transition hover:-translate-y-1 hover:shadow-lg">
+  {% if service.card_image %}
+    {% image service.card_image fill-640x360 class="-mx-6 -mt-6 mb-2 aspect-video w-[calc(100%+3rem)] max-w-none rounded-t-(--radius-card) object-cover md:-mx-8 md:-mt-8 md:w-[calc(100%+4rem)]" loading="lazy" %}
+  {% else %}
+    <span class="icon-badge">{% icon service.icon %}</span>
+  {% endif %}
+  <h2 class="text-xl md:text-2xl">{{ service.title }}</h2>
+  {% if service.short_description %}<p class="text-ink-soft">{{ service.short_description|linebreaksbr }}</p>{% endif %}
+  <span class="mt-auto inline-flex items-center gap-2 pt-2 font-semibold group-hover:text-accent-hover">Подробнее{% icon "arrow-right" "size-4" %}</span>
+</a>

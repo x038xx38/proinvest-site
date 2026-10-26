@@ -1,0 +1,21 @@
+{% load core_tags wagtailimages_tags %}
+{# Карточка кейса: card — словарь из CasePage.as_card() или CasesBlock.get_cards() #}
+{% if card.url %}<a href="{{ card.url }}" class="group card flex flex-col overflow-hidden p-0! transition hover:-translate-y-1 hover:shadow-lg">{% else %}<article class="card flex flex-col overflow-hidden p-0!">{% endif %}
+  {% if card.image %}
+    {% image card.image fill-640x420 class="aspect-[32/21] w-full object-cover" loading="lazy" %}
+  {% else %}
+    <div class="flex aspect-[32/21] items-center justify-center bg-accent-soft text-accent-hover">{% icon "box" "size-14" %}</div>
+  {% endif %}
+  <div class="flex flex-1 flex-col p-6">
+    {% if card.city %}<p class="flex items-center gap-1.5 text-sm text-muted">{% icon "map-pin" "size-4" %}{{ card.city }}</p>{% endif %}
+    <h3 class="mt-2 text-lg md:text-xl">{{ card.title }}</h3>
+    {% if card.budget or card.yield_text or card.term %}
+    <div class="mt-auto pt-6"><dl class="grid grid-cols-3 gap-3 border-t border-line pt-4 text-sm">
+      {% if card.budget %}<div><dt class="text-muted">Бюджет</dt><dd class="mt-1 font-bold">{{ card.budget }}</dd></div>{% endif %}
+      {% if card.yield_text %}<div><dt class="text-muted">Доходность</dt><dd class="mt-1 font-bold">{{ card.yield_text }}</dd></div>{% endif %}
+      {% if card.term %}<div><dt class="text-muted">Срок</dt><dd class="mt-1 font-bold">{{ card.term }}</dd></div>{% endif %}
+    </dl></div>
+    {% endif %}
+    {% if card.url and card.link_text %}<span class="mt-6 inline-flex items-center gap-2 font-semibold group-hover:text-accent-hover">{{ card.link_text }}{% icon "arrow-right" "size-4" %}</span>{% endif %}
+  </div>
+{% if card.url %}</a>{% else %}</article>{% endif %}

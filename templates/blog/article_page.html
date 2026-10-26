@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags wagtailroutablepage_tags %}
+{% block content %}
+<article>
+  <header class="pb-8 pt-10 md:pt-16">
+    <div class="container-site">
+      <div class="max-w-3xl">
+        <p class="text-sm text-muted">
+          <a href="{% pageurl page.get_parent %}" class="hover:text-accent-hover">Статьи</a>
+          {% if page.category %} · <a href="{% routablepageurl page.get_parent.specific 'category' page.category.slug %}" class="hover:text-accent-hover">{{ page.category.name }}</a>{% endif %}
+          · <time datetime="{{ page.date|date:'Y-m-d' }}">{{ page.date|date:"j E Y" }}</time>
+        </p>
+        <h1 class="mt-4">{{ page.title }}</h1>
+        {% if page.excerpt %}<p class="mt-5 text-lg text-ink-soft md:text-xl">{{ page.excerpt }}</p>{% endif %}
+      </div>
+      {% if page.cover_image %}
+        {% image page.cover_image fill-1200x630 class="mt-10 aspect-[40/21] w-full rounded-(--radius-card) object-cover" fetchpriority="high" %}
+      {% endif %}
+    </div>
+  </header>
+  <div class="pb-14 md:pb-20">
+    <div class="container-site">
+      <div class="flex max-w-3xl flex-col gap-8 text-lg">
+        {% for block in page.body %}{% include_block block %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</article>
+
+{% include "includes/consultation_cta.html" with title="Остались вопросы?" %}
+
+{% if related %}
+<section class="section bg-surface">
+  <div class="container-site">
+    <h2>Читайте также</h2>
+    <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for article in related %}{% include "includes/article_card.html" %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

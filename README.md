@@ -17,6 +17,7 @@ Django 5.2 + Wagtail 7.4, PostgreSQL, Redis/Celery, Tailwind CSS 4.
 ```bash
 make setup        # venv, зависимости, сервисы в Docker, миграции, сборка CSS
 make superuser    # администратор
+make content      # дерево страниц с начальными текстами и демо-кейсами
 make run          # dev-сервер
 make css-watch    # в соседнем терминале: пересборка CSS при правках шаблонов
 make worker       # при необходимости: Celery (письма, интеграции)
@@ -29,15 +30,26 @@ Postgres, Redis и Mailpit работают в Docker (`make up` / `make down`),
 ```
 config/        настройки (base / dev / prod), urls, celery
 apps/core      настройки сайта и меню, библиотека блоков (blocks.py), иконки, витрина, robots.txt
-apps/pages     главная и служебные страницы Wagtail
-apps/services  направления и услуги (этап 2)
-apps/cases     кейсы (этап 2)
-apps/blog      статьи (этап 2)
+apps/pages     главная, страницы из блоков, контакты, юр. страницы; команда setup_site
+apps/services  раздел услуг и страницы услуг из блоков
+apps/cases     кейсы: параметры, галерея, связь с услугой; список с фильтрами
+apps/blog      статьи и рубрики (/stati/rubrika/<slug>/)
 apps/leads     заявки (этап 3)
 apps/course    обучение: потоки, тарифы, заказы, оплата Т-Банк (этап 4)
 templates/     шаблоны
 frontend/      исходник Tailwind (main.css), сборка в static/dist
 static/        статика (js, шрифты, Alpine.js в js/vendor) — всё, что попадает в collectstatic
+```
+
+## Наполнение
+
+`python manage.py setup_site` создаёт недостающие страницы (главная, услуги, о проекте, кейсы,
+статьи, контакты, политика, оферта) с черновыми текстами. Существующие страницы не трогает.
+С флагом `--demo` добавляет демо-кейсы и статьи с пометкой «Демо» — их потом удаляют в CMS.
+На стенде запускается один раз после деплоя:
+
+```bash
+sudo -u proinvest bash -c 'cd /opt/proinvest/app && DJANGO_SETTINGS_MODULE=config.settings.prod .venv/bin/python manage.py setup_site --demo'
 ```
 
 ## Блоки страниц

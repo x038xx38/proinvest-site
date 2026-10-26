@@ -1,0 +1,14 @@
+{# page_obj; query — дополнительные GET-параметры фильтров вида "&tip=kladovaya" #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-12 flex flex-wrap items-center justify-center gap-2" aria-label="Страницы">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{{ query }}" class="btn-outline px-4! py-2!" rel="prev">←</a>{% endif %}
+  {% for number in page_obj.paginator.page_range %}
+    {% if number == page_obj.number %}
+      <span class="btn bg-ink px-4! py-2! text-white" aria-current="page">{{ number }}</span>
+    {% else %}
+      <a href="?page={{ number }}{{ query }}" class="btn px-4! py-2! hover:bg-surface">{{ number }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{{ query }}" class="btn-outline px-4! py-2!" rel="next">→</a>{% endif %}
+</nav>
+{% endif %}
