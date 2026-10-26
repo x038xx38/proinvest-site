@@ -1,19 +1,48 @@
 #!/usr/bin/env bash
-# Первичная подготовка сервера под ProInvest. Запускается ОДИН раз от root:
-#   bash bootstrap.sh <домен> <email-для-letsencrypt>
-# Существующие сервисы (StoreParking, почта, MySQL, Apache) не трогает.
+# Первичная подготовка сервера под ProInvest. Запускается ОДИН раз от root.
+#
+#   Без домена (стенд на отдельном порту, HTTP):
+#     bash bootstrap.sh 80.87.198.107
+#   С доменом (порт 80/443, сертификат Let's Encrypt):
+#     bash bootstrap.sh new.example.ru admin@example.ru
+#
+# Существующие сервисы (StoreParking, почта, MySQL, Apache, ISPmanager) не трогает:
+# в режиме IP nginx слушает только отдельный порт и не влияет на выбор сайтов на 80/443.
 set -euo pipefail
 
-DOMAIN=${1:?Укажите домен, например: bash bootstrap.sh new.example.ru admin@example.ru}
-CERT_EMAIL=${2:?Укажите email для SSL-сертификата}
+HOST=${1:?Укажите IP или домен}
+CERT_EMAIL=${2:-}
+IP_PORT=8090
 REPO=git@github.com:x038xx38/proinvest-site.git
 TAILWIND_VERSION=v4.3.3
 DEPLOY_USER=codex-deploy
+GUARD_URL=https://storeparking.ru/
 
 HOME_DIR=/opt/proinvest
 APP=$HOME_DIR/app
 
 [[ $EUID -eq 0 ]] || { echo "Запустите от root"; exit 1; }
+
+if [[ $HOST =~ ^[0-9.]+$ ]]; then
+    MODE=ip
+    LISTEN=$IP_PORT
+    SERVER_NAME=_
+    SITE_URL=http://$HOST:$IP_PORT
+    USE_HTTPS=false
+    NGINX_CONF=proinvest-ip.conf
+else
+    MODE=domain
+    [[ -n $CERT_EMAIL ]] || { echo "Для домена укажите email для SSL-сертификата вторым аргументом"; exit 1; }
+    LISTEN=80
+    SERVER_NAME=$HOST
+    SITE_URL=https://$HOST
+    USE_HTTPS=true
+    NGINX_CONF=$HOST.conf
+fi
+
+guard_status() { curl -s -o /dev/null -m 10 -w '%{http_code}' "$GUARD_URL" || true; }
+GUARD_BEFORE=$(guard_status)
+echo "==> $GUARD_URL до изменений отвечает: $GUARD_BEFORE"
 
 echo "==> Пакеты"
 apt-get update -qq
@@ -37,7 +66,7 @@ echo "==> Deploy-ключ GitHub"
 if [[ ! -f $HOME_DIR/.ssh/id_ed25519 ]]; then
     sudo -u proinvest mkdir -p "$HOME_DIR/.ssh"
     sudo -u proinvest ssh-keygen -q -t ed25519 -N "" -C "proinvest@$(hostname)" -f "$HOME_DIR/.ssh/id_ed25519"
-    sudo -u proinvest ssh-keyscan -t ed25519 github.com >> "$HOME_DIR/.ssh/known_hosts" 2>/dev/null
+    sudo -u proinvest bash -c "ssh-keyscan -t ed25519 github.com >> $HOME_DIR/.ssh/known_hosts 2>/dev/null"
 fi
 
 echo "==> Tailwind"
@@ -48,7 +77,7 @@ chmod +x "$HOME_DIR/bin/tailwindcss"
 chown -R proinvest:proinvest "$HOME_DIR/bin"
 
 echo "==> Пароль тестового стенда"
-STAGE_PASSWORD=$(openssl rand -base64 12)
+STAGE_PASSWORD=$(openssl rand -base64 12 | tr -d '/+=')
 htpasswd -bc "$HOME_DIR/htpasswd" proinvest "$STAGE_PASSWORD" >/dev/null
 chown root:www-data "$HOME_DIR/htpasswd"
 chmod 640 "$HOME_DIR/htpasswd"
@@ -61,7 +90,8 @@ EOF
 chmod 440 /etc/sudoers.d/proinvest-deploy
 visudo -cf /etc/sudoers.d/proinvest-deploy
 
-cat <<EOF
+if [[ ! -d $APP/.git ]]; then
+    cat <<EOF
 
 ================================================================
 Добавьте этот ключ в GitHub как Deploy key (только чтение):
@@ -70,10 +100,8 @@ https://github.com/x038xx38/proinvest-site/settings/keys/new
 $(cat "$HOME_DIR/.ssh/id_ed25519.pub")
 ================================================================
 EOF
-read -rp "Ключ добавлен? Нажмите Enter, чтобы продолжить… "
-
-echo "==> Клонирование"
-if [[ ! -d $APP/.git ]]; then
+    read -rp "Ключ добавлен? Нажмите Enter, чтобы продолжить… "
+    echo "==> Клонирование"
     sudo -u proinvest git clone -q "$REPO" "$APP"
 fi
 
@@ -82,13 +110,14 @@ if [[ ! -f $APP/.env ]]; then
     cat > "$APP/.env" <<EOF
 DJANGO_SECRET_KEY=$(openssl rand -base64 48 | tr -d '\n/+=')
 DJANGO_DEBUG=false
-DJANGO_ALLOWED_HOSTS=$DOMAIN
-DJANGO_CSRF_TRUSTED_ORIGINS=https://$DOMAIN
-SITE_URL=https://$DOMAIN
+DJANGO_USE_HTTPS=$USE_HTTPS
+DJANGO_ALLOWED_HOSTS=$HOST
+DJANGO_CSRF_TRUSTED_ORIGINS=$SITE_URL
+SITE_URL=$SITE_URL
 DATABASE_URL=postgres://proinvest:$DB_PASSWORD@127.0.0.1:5432/proinvest
 REDIS_URL=redis://127.0.0.1:6379/5
 EMAIL_URL=consolemail://
-DEFAULT_FROM_EMAIL=ПроИнвест <noreply@$DOMAIN>
+DEFAULT_FROM_EMAIL=ПроИнвест <noreply@proinvest.local>
 LEADS_NOTIFY_EMAILS=
 ALLOW_INDEXING=false
 EOF
@@ -106,24 +135,43 @@ systemctl daemon-reload
 systemctl enable --now proinvest-web proinvest-worker
 
 echo "==> nginx"
-sed "s/{{DOMAIN}}/$DOMAIN/g" "$APP/deploy/nginx.conf.template" > "/etc/nginx/sites-available/$DOMAIN.conf"
-ln -sf "/etc/nginx/sites-available/$DOMAIN.conf" "/etc/nginx/sites-enabled/$DOMAIN.conf"
-nginx -t
-systemctl reload nginx
+sed -e "s/{{LISTEN}}/$LISTEN/" -e "s/{{SERVER_NAME}}/$SERVER_NAME/" \
+    "$APP/deploy/nginx.conf.template" > "/etc/nginx/sites-available/$NGINX_CONF"
+ln -sf "/etc/nginx/sites-available/$NGINX_CONF" "/etc/nginx/sites-enabled/$NGINX_CONF"
 
-echo "==> HTTPS"
-SERVER_IP=$(curl -fsS https://api.ipify.org || true)
-if [[ $(getent hosts "$DOMAIN" | awk '{print $1}' | head -1) == "$SERVER_IP" ]]; then
-    certbot --nginx -n --agree-tos -m "$CERT_EMAIL" -d "$DOMAIN" --redirect
+rollback_nginx() {
+    echo "!!! Откатываю конфиг nginx ProInvest"
+    rm -f "/etc/nginx/sites-enabled/$NGINX_CONF"
+    nginx -t && systemctl reload nginx
+    exit 1
+}
+
+nginx -t || rollback_nginx
+systemctl reload nginx
+sleep 2
+GUARD_AFTER=$(guard_status)
+echo "==> $GUARD_URL после изменений отвечает: $GUARD_AFTER"
+[[ $GUARD_AFTER == "$GUARD_BEFORE" ]] || rollback_nginx
+
+if [[ $MODE == ip ]]; then
+    if ufw status 2>/dev/null | grep -q "Status: active"; then
+        ufw allow "$IP_PORT/tcp"
+    fi
+    echo "Если сайт не откроется снаружи — откройте порт $IP_PORT/tcp в файрволе ISPmanager."
 else
-    echo "DNS $DOMAIN ещё не указывает на $SERVER_IP — сертификат выпустите позже:"
-    echo "  certbot --nginx -n --agree-tos -m $CERT_EMAIL -d $DOMAIN --redirect"
+    SERVER_IP=$(curl -fsS https://api.ipify.org || true)
+    if [[ $(getent hosts "$HOST" | awk '{print $1}' | head -1) == "$SERVER_IP" ]]; then
+        certbot --nginx -n --agree-tos -m "$CERT_EMAIL" -d "$HOST" --redirect
+    else
+        echo "DNS $HOST ещё не указывает на $SERVER_IP — сертификат выпустите позже:"
+        echo "  certbot --nginx -n --agree-tos -m $CERT_EMAIL -d $HOST --redirect"
+    fi
 fi
 
 cat <<EOF
 
 Готово.
-  Сайт:   https://$DOMAIN   (логин proinvest, пароль $STAGE_PASSWORD)
-  Админка Django: создайте пользователя командой
+  Сайт:   $SITE_URL   (логин proinvest, пароль $STAGE_PASSWORD)
+  Админку создаст разработчик или:
     sudo -u proinvest bash -c 'cd $APP && DJANGO_SETTINGS_MODULE=config.settings.prod .venv/bin/python manage.py createsuperuser'
 EOF

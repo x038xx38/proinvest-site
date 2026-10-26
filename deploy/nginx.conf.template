@@ -1,7 +1,7 @@
-# ProInvest — {{DOMAIN}}. HTTPS-блок добавит certbot --nginx.
+# ProInvest — {{SERVER_NAME}}. Для домена HTTPS-блок добавит certbot --nginx.
 server {
-    listen 80;
-    server_name {{DOMAIN}};
+    listen {{LISTEN}};
+    server_name {{SERVER_NAME}};
 
     client_max_body_size 20m;
 
@@ -23,7 +23,7 @@ server {
         auth_basic_user_file /opt/proinvest/htpasswd;
 
         proxy_pass http://127.0.0.1:8010;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
