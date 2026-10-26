@@ -1,0 +1,16 @@
+[Unit]
+Description=ProInvest Celery worker
+After=network.target postgresql.service redis-server.service
+
+[Service]
+User=proinvest
+Group=proinvest
+WorkingDirectory=/opt/proinvest/app
+EnvironmentFile=/opt/proinvest/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/opt/proinvest/app/.venv/bin/celery -A config worker -l info --concurrency 1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
