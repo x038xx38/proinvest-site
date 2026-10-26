@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: proinvest
+          POSTGRES_USER: proinvest
+          POSTGRES_PASSWORD: proinvest
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U proinvest -d proinvest"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      DJANGO_SECRET_KEY: ci-not-secret
+      DATABASE_URL: postgres://proinvest:proinvest@localhost:5432/proinvest
+      REDIS_URL: redis://localhost:6379/0
+      EMAIL_URL: consolemail://
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements/*.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements/dev.txt
+          npm ci
+
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Build CSS
+        run: npm run build
+
+      - name: Check migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Django checks
+        run: python manage.py check
+
+      - name: Tests
+        run: pytest -q
