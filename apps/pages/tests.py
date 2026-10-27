@@ -1,8 +1,10 @@
 import io
+import tempfile
 
 import pytest
 from django.core.management import call_command
 from django.db import transaction
+from django.test import override_settings
 from wagtail.models import Page
 
 from apps.cases.models import CasePage
@@ -25,15 +27,25 @@ SITE_URLS = [
     "/stati/rubrika/kladovye/",
     "/stati/demo-1/",
     "/kontakty/",
+    "/obuchenie/",
     "/politika/",
+    "/soglasie/",
     "/oferta/",
 ]
 
 
 @pytest.fixture(scope="module")
 def _site_tree(django_db_setup, django_db_blocker):
-    """Дерево страниц создаётся один раз на модуль и откатывается в конце."""
-    with django_db_blocker.unblock(), transaction.atomic():
+    """Дерево страниц создаётся один раз на модуль и откатывается в конце.
+
+    Фото автора курса сохраняется во временную папку, а не в media/ разработчика.
+    """
+    with (
+        tempfile.TemporaryDirectory() as media_root,
+        override_settings(MEDIA_ROOT=media_root),
+        django_db_blocker.unblock(),
+        transaction.atomic(),
+    ):
         call_command("setup_site", demo=True, stdout=io.StringIO())
         yield
         transaction.set_rollback(True)
@@ -53,6 +65,31 @@ def test_setup_site_is_idempotent(site):
     count = Page.objects.count()
     call_command("setup_site", demo=True, stdout=io.StringIO())
     assert Page.objects.count() == count
+
+
+def test_course_page_has_waitlist_form_and_author_photo(client, site):
+    html = client.get("/obuchenie/").content.decode()
+    assert 'name="lead_type" value="course_waitlist"' in html
+    assert 'id="predzapis"' in html
+    assert "Максим Гурлёв" in html
+    assert 'alt="Максим Гурлёв"' in html
+
+
+def test_forms_link_consent_and_privacy_pages(client, site):
+    html = client.get("/kontakty/").content.decode()
+    assert 'href="/soglasie/"' in html
+    assert 'href="/politika/"' in html
+
+
+def test_setup_site_keeps_single_author_photo_and_consent_link(site):
+    from wagtail.images.models import Image
+
+    from apps.core.models import Navigation
+
+    call_command("setup_site", stdout=io.StringIO())
+    assert Image.objects.filter(title="Максим Гурлёв").count() == 1
+    urls = [block.value.href for block in Navigation.load().legal_links]
+    assert urls.count("/soglasie/") == 1
 
 
 def test_unknown_blog_category_is_404(client, site):

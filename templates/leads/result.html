@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{# Ответ на отправку формы без JavaScript: ok — заявка принята, иначе form с ошибками #}
+{% block title %}{% if ok %}Заявка отправлена{% else %}Заявка не отправлена{% endif %} — ПроИнвест{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container-site max-w-2xl">
+    {% if ok %}
+      <span class="icon-badge">{% icon "check" %}</span>
+      <h1 class="mt-6">Спасибо, заявка отправлена</h1>
+      <p class="mt-4 text-lg text-ink-soft">Свяжемся с вами в ближайшее время.</p>
+    {% else %}
+      <h1>Заявка не отправлена</h1>
+      <ul class="mt-6 flex flex-col gap-2 text-lg text-danger">
+        {% for field, errors in form.errors.items %}{% for error in errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}
+      </ul>
+      <p class="mt-4 text-ink-soft">Вернитесь назад, исправьте данные и отправьте форму ещё раз.</p>
+    {% endif %}
+    <a href="{{ back_url }}" class="btn-outline mt-8">Вернуться на сайт</a>
+  </div>
+</section>
+{% endblock %}

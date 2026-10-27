@@ -1,0 +1,13 @@
+{% extends "blocks/_section.html" %}
+{% block body %}
+<div class="mt-10 gap-6 md:mt-12 md:columns-2 lg:columns-3">
+  {% for item in value.items %}
+  <figure class="card mb-6 break-inside-avoid">
+    <blockquote class="text-ink-soft">{{ item.text|linebreaks }}</blockquote>
+    <figcaption class="mt-5 border-t border-line pt-4">
+      <span class="font-semibold text-ink">{{ item.author }}</span>{% if item.caption %}<span class="text-muted"> · {{ item.caption }}</span>{% endif %}
+    </figcaption>
+  </figure>
+  {% endfor %}
+</div>
+{% endblock %}

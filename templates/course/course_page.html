@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+{% if not page.starts_with_hero %}{% include "includes/page_header.html" with title=page.title intro=page.intro %}{% endif %}
+{% include_block page.body %}
+{% endblock %}

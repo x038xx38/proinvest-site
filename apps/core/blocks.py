@@ -9,6 +9,8 @@ from wagtail.blocks.struct_block import StructBlockValidationError
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.images.blocks import ImageChooserBlock
 
+from apps.leads.choices import LeadType
+
 ICON_CHOICES = [
     ("check", "Галочка"),
     ("shield", "Защита"),
@@ -28,13 +30,6 @@ ICON_CHOICES = [
 ]
 
 BACKGROUND_CHOICES = [("white", "Белый"), ("surface", "Серый")]
-
-LEAD_TYPE_CHOICES = [
-    ("consultation", "Консультация"),
-    ("analysis", "Платный анализ объекта"),
-    ("course_waitlist", "Предзапись на обучение"),
-    ("contact", "Контакт"),
-]
 
 
 class LinkValue(blocks.StructValue):
@@ -307,7 +302,7 @@ class CtaBlock(blocks.StructBlock):
 
 class LeadFormBlock(SectionBlock):
     lead_type = blocks.ChoiceBlock(
-        label="Тип заявки", choices=LEAD_TYPE_CHOICES, default="consultation"
+        label="Тип заявки", choices=LeadType.choices, default="consultation"
     )
     bullets = blocks.ListBlock(
         blocks.CharBlock(label="Пункт"), label="Что получит клиент", default=[]
@@ -320,6 +315,53 @@ class LeadFormBlock(SectionBlock):
         template = "blocks/lead_form.html"
 
 
+class PersonBlock(SectionBlock):
+    """Эксперт или автор курса: фото, рассказ, цифры."""
+
+    photo = ImageChooserBlock(label="Фото", required=False)
+    name = blocks.CharBlock(label="Имя", max_length=120)
+    role = blocks.CharBlock(label="Кто это", max_length=160, required=False)
+    link = OptionalLinkBlock(label="Ссылка (например, Telegram-канал)")
+    text = blocks.RichTextBlock(label="Рассказ", features=["bold", "italic", "link", "ul", "ol"])
+    facts_title = blocks.CharBlock(label="Заголовок к цифрам", max_length=160, required=False)
+    facts = blocks.ListBlock(
+        blocks.StructBlock(
+            [
+                ("value", blocks.CharBlock(label="Значение", max_length=24)),
+                ("label", blocks.CharBlock(label="Подпись", max_length=80)),
+            ]
+        ),
+        label="Цифры",
+        max_num=4,
+        default=[],
+    )
+    note = blocks.TextBlock(label="Сноска", required=False)
+
+    class Meta:
+        icon = "user"
+        label = "Эксперт"
+        template = "blocks/person.html"
+
+
+class ReviewsBlock(SectionBlock):
+    items = blocks.ListBlock(
+        blocks.StructBlock(
+            [
+                ("text", blocks.TextBlock(label="Отзыв")),
+                ("author", blocks.CharBlock(label="Имя", max_length=80)),
+                ("caption", blocks.CharBlock(label="Подпись", max_length=80, required=False)),
+            ]
+        ),
+        label="Отзывы",
+        min_num=1,
+    )
+
+    class Meta:
+        icon = "openquote"
+        label = "Отзывы"
+        template = "blocks/reviews.html"
+
+
 class SectionsBlock(blocks.StreamBlock):
     hero = HeroBlock()
     benefits = BenefitsBlock()
@@ -327,6 +369,8 @@ class SectionsBlock(blocks.StreamBlock):
     pricing = PricingBlock()
     cases = CasesBlock()
     faq = FaqBlock()
+    person = PersonBlock()
+    reviews = ReviewsBlock()
     text = RichTextSectionBlock()
     cta = CtaBlock()
     lead_form = LeadFormBlock()

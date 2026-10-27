@@ -16,6 +16,7 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("sitemap.xml", sitemap),
     path("robots.txt", robots_txt),
+    path("zayavka/", include("apps.leads.urls")),
     path("styleguide/", styleguide, name="styleguide"),
     path("styleguide/<slug:slug>/", styleguide, name="styleguide"),
 ]

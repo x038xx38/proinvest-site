@@ -1,22 +1,42 @@
-{# Поля заявки: prefix (уникальность id на странице), lead_type, button_text. Обработчик — этап 3 #}
-<form method="post" class="flex flex-col gap-4" data-lead-form>
-  {% csrf_token %}
-  <input type="hidden" name="lead_type" value="{{ lead_type }}">
-  <div>
-    <label for="{{ prefix }}-name" class="label">Имя</label>
-    <input id="{{ prefix }}-name" name="name" type="text" class="input" autocomplete="name" required maxlength="100">
+{% load core_tags wagtailcore_tags %}
+{# Поля заявки: prefix (уникальность id на странице), lead_type, button_text. Отправка — static/js/main.js #}
+{% with s=settings.core.SiteSettings %}
+<div data-lead-form-wrap>
+  <form method="post" action="{% url 'leads:create' %}" class="flex flex-col gap-4" data-lead-form novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="lead_type" value="{{ lead_type }}">
+    <input type="hidden" name="page_url" value="{{ request.path }}">
+    {% if page.pk %}<input type="hidden" name="page_id" value="{{ page.pk }}">{% endif %}
+    <div class="absolute -left-[9999px]" aria-hidden="true">
+      <label for="{{ prefix }}-website">Сайт</label>
+      <input id="{{ prefix }}-website" name="website" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <div>
+      <label for="{{ prefix }}-name" class="label">Имя</label>
+      <input id="{{ prefix }}-name" name="name" type="text" class="input" autocomplete="name" required maxlength="100">
+    </div>
+    <div>
+      <label for="{{ prefix }}-contact" class="label">Телефон или Telegram</label>
+      <input id="{{ prefix }}-contact" name="contact" type="text" class="input" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00 или @username" required maxlength="100">
+    </div>
+    <div>
+      <label for="{{ prefix }}-comment" class="label">Комментарий <span class="text-muted">— необязательно</span></label>
+      <textarea id="{{ prefix }}-comment" name="comment" rows="3" class="input resize-y" maxlength="2000"></textarea>
+    </div>
+    <div>
+      <label class="flex gap-3 text-sm text-ink-soft">
+        <input type="checkbox" name="consent" required class="mt-0.5 size-5 shrink-0 accent-accent-hover">
+        <span>Даю {% if s.consent_page %}<a href="{% pageurl s.consent_page %}" class="underline hover:text-accent-hover" target="_blank">согласие на обработку персональных данных</a>{% else %}согласие на обработку персональных данных{% endif %}</span>
+      </label>
+      {% if s.privacy_page %}<p class="mt-2 pl-8 text-xs text-muted">Как мы обращаемся с данными — в <a href="{% pageurl s.privacy_page %}" class="underline hover:text-accent-hover" target="_blank">политике конфиденциальности</a>.</p>{% endif %}
+    </div>
+    <p class="text-sm font-medium text-danger" data-lead-error role="alert" hidden></p>
+    <button type="submit" class="btn-primary mt-2 w-full">{{ button_text|default:"Отправить заявку" }}</button>
+  </form>
+  <div class="flex flex-col items-start gap-4 py-6" data-lead-success role="status" hidden>
+    <span class="icon-badge">{% icon "check" %}</span>
+    <p class="text-xl font-bold">Спасибо, заявка отправлена</p>
+    <p class="text-ink-soft">Свяжемся с вами в ближайшее время.</p>
   </div>
-  <div>
-    <label for="{{ prefix }}-contact" class="label">Телефон или Telegram</label>
-    <input id="{{ prefix }}-contact" name="contact" type="text" class="input" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00 или @username" required maxlength="100">
-  </div>
-  <div>
-    <label for="{{ prefix }}-comment" class="label">Комментарий <span class="text-muted">— необязательно</span></label>
-    <textarea id="{{ prefix }}-comment" name="comment" rows="3" class="input resize-y" maxlength="2000"></textarea>
-  </div>
-  <label class="flex gap-3 text-sm text-ink-soft">
-    <input type="checkbox" name="consent" required class="mt-0.5 size-5 shrink-0 accent-accent-hover">
-    <span>Согласен на <a href="/politika/" class="underline hover:text-accent-hover" target="_blank">обработку персональных данных</a></span>
-  </label>
-  <button type="submit" class="btn-primary mt-2 w-full">{{ button_text|default:"Отправить заявку" }}</button>
-</form>
+</div>
+{% endwith %}

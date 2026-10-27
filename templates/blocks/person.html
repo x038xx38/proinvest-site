@@ -1,0 +1,31 @@
+{% extends "blocks/_section.html" %}
+{% load core_tags wagtailcore_tags wagtailimages_tags %}
+{% block body %}
+<div class="mt-10 grid items-start gap-10 md:mt-12{% if value.photo %} lg:grid-cols-5 lg:gap-16{% endif %}">
+  {% if value.photo %}
+  <div class="lg:col-span-2">
+    {% image value.photo fill-560x640 class="aspect-[7/8] w-full rounded-(--radius-card) object-cover" alt=value.name loading="lazy" %}
+  </div>
+  {% endif %}
+  <div class="{% if value.photo %}lg:col-span-3{% else %}max-w-3xl{% endif %}">
+    <h3 class="text-2xl md:text-3xl">{{ value.name }}</h3>
+    {% if value.role %}<p class="mt-2 text-lg text-ink-soft">{{ value.role }}</p>{% endif %}
+    {% if value.link.text %}
+    <a href="{{ value.link.href }}" class="mt-4 inline-flex items-center gap-2 font-semibold hover:text-accent-hover"{% if value.link.href|slice:':4' == 'http' %} target="_blank" rel="noopener"{% endif %}>{% icon "send" "size-5" %}{{ value.link.text }}</a>
+    {% endif %}
+    <div class="rich-text mt-6 text-lg">{{ value.text|richtext }}</div>
+    {% if value.facts %}
+    {% if value.facts_title %}<p class="mt-8 font-semibold">{{ value.facts_title }}</p>{% endif %}
+    <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+      {% for fact in value.facts %}
+      <div class="rounded-(--radius-card) bg-accent-soft p-5">
+        <dt class="text-sm font-semibold uppercase tracking-wider text-ink-soft">{{ fact.label }}</dt>
+        <dd class="mt-1 text-2xl font-extrabold md:text-3xl">{{ fact.value }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+    {% endif %}
+    {% if value.note %}<p class="mt-4 text-sm text-muted">{{ value.note|linebreaksbr }}</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

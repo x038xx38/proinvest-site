@@ -1,5 +1,5 @@
 from django.db import models
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, PageChooserPanel
 from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.fields import StreamField
 
@@ -31,6 +31,23 @@ class SiteSettings(BaseGenericSetting):
     )
     yandex_metrika_id = models.CharField("ID Яндекс.Метрики", max_length=32, blank=True)
     google_analytics_id = models.CharField("ID Google Analytics (G-…)", max_length=32, blank=True)
+    privacy_page = models.ForeignKey(
+        "wagtailcore.Page",
+        verbose_name="Политика конфиденциальности",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    consent_page = models.ForeignKey(
+        "wagtailcore.Page",
+        verbose_name="Согласие на обработку персональных данных",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Ссылка у галочки согласия во всех формах заявок",
+    )
 
     panels = [
         MultiFieldPanel(
@@ -50,6 +67,13 @@ class SiteSettings(BaseGenericSetting):
         ),
         MultiFieldPanel(
             [FieldPanel("yandex_metrika_id"), FieldPanel("google_analytics_id")], "Аналитика"
+        ),
+        MultiFieldPanel(
+            [
+                PageChooserPanel("privacy_page", "pages.LegalPage"),
+                PageChooserPanel("consent_page", "pages.LegalPage"),
+            ],
+            "Юридические документы",
         ),
     ]
 

@@ -1,0 +1,13 @@
+{% autoescape off %}Новая заявка с сайта ПроИнвест
+
+Тип: {{ lead.get_lead_type_display }}
+Имя: {{ lead.name }}
+Контакт: {{ lead.contact }}
+{% if lead.comment %}Комментарий:
+{{ lead.comment }}
+{% endif %}
+Страница: {% if lead.page_url %}{{ site_url }}{{ lead.page_url }}{% else %}—{% endif %}
+Время: {{ lead.created_at|date:"j E Y, H:i" }}
+
+Открыть в админке: {{ admin_url }}
+{% endautoescape %}
